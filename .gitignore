@@ -1,0 +1,39 @@
+# GreenScan Gitignore
+greenscan.db
+greenscan.db-journal
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+.env
+
+# Model checkpoints
+models/*.pt
+models/model_*.pt
+
+# Reports & exports
+reports/
+*.pdf
+*.csv
+*.xlsx
+
+# Local user artifacts
+walkthrough.md
+task.md
+implementation_plan.md
+*.png
+*.webp
+*.txt
+.tempmediaStorage/
+browser/
+.system_generated/
+
+# Large Datasets
+DATASET/
+datasets/
+"new Dataset/"
+new Dataset/
