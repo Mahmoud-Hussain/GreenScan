@@ -45,7 +45,14 @@ Represents a decentralized node participating in the federated training cluster.
 
 ## 🚀 Getting Started
 
-### 1. Install Dependencies
+### 1. Download Datasets
+The datasets used in this project can be downloaded from the following sources:
+- **Kaggle**: [Waste Classification Data](https://www.kaggle.com/datasets/techsash/waste-classification-data)
+- **Google Drive**: [Project Dataset Folder](https://drive.google.com/drive/u/0/folders/10flDS8WzA21_WUy_COY8cEBFmKYLYeuq?brid=YWdncwF_imC9fl9b-HCTtWo8iUi8)
+
+Download the datasets and extract them into the appropriate dataset directories in the project root.
+
+### 2. Install Dependencies
 Ensure you have Python 3.13 installed. Install the required libraries:
 ```bash
 pip install fastapi uvicorn pydantic python-multipart flwr torch torchvision codecarbon psutil pillow
