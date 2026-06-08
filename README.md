@@ -48,6 +48,7 @@ Represents a decentralized node participating in the federated training cluster.
 ### 1. Download Datasets
 The datasets used in this project can be downloaded from the following sources:
 - **Kaggle**: [Waste Classification Data](https://www.kaggle.com/datasets/techsash/waste-classification-data)
+- **Kaggle**: [Garbage Classification Data](https://www.kaggle.com/datasets/mostafaabla/garbage-classification?resource=download)
 - **Google Drive**: [Project Dataset Folder](https://drive.google.com/drive/u/0/folders/10flDS8WzA21_WUy_COY8cEBFmKYLYeuq?brid=YWdncwF_imC9fl9b-HCTtWo8iUi8)
 
 Download the datasets and extract them into the appropriate dataset directories in the project root.
