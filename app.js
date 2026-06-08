@@ -225,7 +225,7 @@ async function runViewerPredict() {
   try {
     const data = await fetch(API+'/predict',{method:'POST',body:form}).then(r=>r.json());
     const pct = Math.round(data.confidence*100);
-    let html = `<div style="font-size:1.2rem;font-weight:700;color:var(--green);margin-bottom:.5rem">${data.predicted_class}</div>
+    let html = `<div style="font-size:1.2rem;font-weight:700;color:var(--green);margin-bottom:.5rem">${data.predicted_class} (${pct}%)</div>
       <div class="pbar-bg" style="margin-bottom:.75rem"><div class="pbar-fill" style="width:${pct}%"></div></div>`;
     if (data.category_scores) {
       const sorted = Object.entries(data.category_scores).sort((a,b)=>b[1]-a[1]);
@@ -325,7 +325,7 @@ async function runPredict() {
     const form=new FormData(); form.append('file',predFile);
     const data = await fetch(API+'/predict',{method:'POST',body:form}).then(r=>r.json());
     const pct=Math.round(data.confidence*100);
-    document.getElementById('pred-class').textContent=data.predicted_class;
+    document.getElementById('pred-class').textContent=`${data.predicted_class} (${pct}%)`;
     setTimeout(()=>{ document.getElementById('pred-conf-bar').style.width=pct+'%'; },50);
     let scoresHtml='';
     if (data.category_scores) {
@@ -470,13 +470,15 @@ async function captureAndPredict() {
       if (!res.ok) throw new Error(data.detail || "Prediction failed");
       
       document.getElementById('cam-snapshot').src = canvas.toDataURL('image/jpeg');
-      document.getElementById('cam-class').textContent = data.predicted_class;
-      document.getElementById('cam-conf-bar').style.width = (data.confidence * 100) + '%';
+      const pct = Math.round(data.confidence * 100);
+      document.getElementById('cam-class').textContent = `${data.predicted_class} (${pct}%)`;
+      document.getElementById('cam-conf-bar').style.width = pct + '%';
       
       let html = '';
       if (data.top5) {
         data.top5.forEach(t => {
-          const w = (t.prob * 100).toFixed(1);
+          const val = t.confidence ?? t.prob ?? 0;
+          const w = (val * 100).toFixed(1);
           html += `<div class="cls-bar"><div class="name">${t.class}</div><div class="bar-bg"><div class="bar-fill" style="width:${w}%"></div></div><div class="num">${w}%</div></div>`;
         });
       }
