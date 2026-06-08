@@ -505,3 +505,57 @@ if (localStorage.getItem('hideGreenScanGuide') !== 'true') {
   setTimeout(openGuide, 600);
 }
 
+// ── Clipboard Paste Support (Ctrl + V) ────────────────────────────────────────
+window.addEventListener('paste', (e) => {
+  const items = e.clipboardData?.items;
+  if (!items) return;
+  
+  let imageFile = null;
+  for (let i = 0; i < items.length; i++) {
+    if (items[i].type.indexOf('image') !== -1) {
+      imageFile = items[i].getAsFile();
+      break;
+    }
+  }
+  
+  if (!imageFile) return;
+
+  // Determine active page
+  const activePage = document.querySelector('.page.active');
+  const pageId = activePage ? activePage.id : 'page-dashboard';
+
+  if (pageId === 'page-predict') {
+    predFile = imageFile;
+    document.getElementById('pred-drop-zone').style.display = 'none';
+    document.getElementById('pred-preview-row').style.display = 'flex';
+    document.getElementById('pred-img').src = URL.createObjectURL(predFile);
+    document.getElementById('pred-result').style.display = 'none';
+    document.getElementById('pred-error').style.display = 'none';
+    runPredict();
+    log('Pasted image into Predict tab');
+  } else if (pageId === 'page-viewer') {
+    viewerFile = imageFile;
+    const url = URL.createObjectURL(viewerFile);
+    const orig = document.getElementById('viewer-orig');
+    orig.src = url; orig.style.display = 'block';
+    document.getElementById('viewer-result').innerHTML = '';
+    document.getElementById('heatmap-img').style.display = 'none';
+    document.getElementById('heatmap-placeholder').style.display = 'flex';
+    runViewerPredict();
+    log('Pasted image into Learning Viewer tab');
+  } else {
+    // Auto-route to Predict page and load pasted image
+    showPage('predict');
+    setTimeout(() => {
+      predFile = imageFile;
+      document.getElementById('pred-drop-zone').style.display = 'none';
+      document.getElementById('pred-preview-row').style.display = 'flex';
+      document.getElementById('pred-img').src = URL.createObjectURL(predFile);
+      document.getElementById('pred-result').style.display = 'none';
+      document.getElementById('pred-error').style.display = 'none';
+      runPredict();
+      log('Pasted image and auto-routed to Predict tab');
+    }, 100);
+  }
+});
+
