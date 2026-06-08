@@ -12,7 +12,11 @@ from sqlalchemy import (
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 
 Base = declarative_base()
-ENGINE = create_engine("sqlite:///greenscan.db", echo=False)
+ENGINE = create_engine(
+    "sqlite:///greenscan.db",
+    echo=False,
+    connect_args={"check_same_thread": False, "timeout": 30}
+)
 SessionLocal = sessionmaker(bind=ENGINE)
 
 

@@ -21,6 +21,25 @@ FOLDER_CLASS_MAP = {
     "new labelme(plastic)": "plastic"
 }
 
+# ── Class mapping: Raw image folder name -> Final Class ───────────────────────
+IMAGE_FOLDER_MAP = {
+    "battery":       "ewaste",
+    "biological":    "organic",
+    "brown-glass":   "glass",
+    "cardboard":     "paper",
+    "clothes":       "clothing",
+    "clothing":      "clothing",
+    "ewaste":        "ewaste",
+    "glass":         "glass",
+    "green-glass":   "glass",
+    "metal":         "metal",
+    "paper":         "paper",
+    "plastic":       "plastic",
+    "shoes":         "clothing",
+    "trash":         "recyclable",
+    "white-glass":   "glass"
+}
+
 KAGGLE_MAP = {
     "O": "organic",
     "R": "recyclable"
@@ -74,6 +93,24 @@ def collect_and_crop_custom(folder: Path, class_name: str, dest_temp: Path) -> l
                 crops.append(out_path)
     return crops
 
+def collect_raw_images(folder: Path, class_name: str, dest_temp: Path) -> list[Path]:
+    """Collects and processes raw image files, converting HEIC/PNG/WEBP/etc to JPG."""
+    import pillow_heif
+    pillow_heif.register_heif_opener()
+    
+    imgs = []
+    exts = {".jpg", ".jpeg", ".png", ".webp", ".heic"}
+    for f in sorted(folder.iterdir()):
+        if f.is_file() and f.suffix.lower() in exts:
+            out_path = dest_temp / f"{folder.name}_{f.stem}.jpg"
+            try:
+                img = Image.open(f).convert("RGB")
+                img.save(out_path, "JPEG", quality=95)
+                imgs.append(out_path)
+            except Exception as e:
+                print(f"Error copying/converting {f}: {e}")
+    return imgs
+
 def collect_kaggle_images(kaggle_dir: Path, folder_name: str, dest_temp: Path) -> list[Path]:
     """Collects images from Kaggle TRAIN and TEST folders and copies to temp."""
     imgs = []
@@ -114,12 +151,20 @@ def main():
     temp_crop_dir = DEST_DIR / "_temp"
     temp_crop_dir.mkdir(parents=True, exist_ok=True)
 
-    # 1. Process Custom Dataset
+    # 1. Process Custom Dataset (LabelMe Annotations)
     if CUSTOM_SOURCE_DIR.exists():
         for folder_name, class_name in FOLDER_CLASS_MAP.items():
             folder = CUSTOM_SOURCE_DIR / folder_name
             if folder.exists():
                 imgs = collect_and_crop_custom(folder, class_name, temp_crop_dir)
+                class_images[class_name].extend(imgs)
+
+    # 1b. Process Custom Dataset (Raw Image folders)
+    if CUSTOM_SOURCE_DIR.exists():
+        for folder_name, class_name in IMAGE_FOLDER_MAP.items():
+            folder = CUSTOM_SOURCE_DIR / folder_name
+            if folder.exists():
+                imgs = collect_raw_images(folder, class_name, temp_crop_dir)
                 class_images[class_name].extend(imgs)
 
     # 2. Process Kaggle Dataset
@@ -167,7 +212,7 @@ def main():
             count = len(list(d.glob("*.jpg")))
             print(f"  {split}/{cls}: {count} files")
 
-    print(f"\n✅ Master Dataset ready at: {DEST_DIR.resolve()}")
+    print(f"\n[SUCCESS] Master Dataset ready at: {DEST_DIR.resolve()}")
 
 if __name__ == "__main__":
     main()
