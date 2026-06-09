@@ -36,8 +36,8 @@ def build_model():
 # ── Flower Client ─────────────────────────────────────────────────────────────
 
 class WasteClient(fl.client.NumPyClient):
-    def __init__(self, node_id: int, data_loader):
-        self.node_name = NODE_NAMES[node_id] if node_id < len(NODE_NAMES) else f"node_{node_id}"
+    def __init__(self, node_id: int, data_loader, name: str = None):
+        self.node_name = name if name else (NODE_NAMES[node_id] if node_id < len(NODE_NAMES) else f"node_{node_id}")
         self.model = build_model()
         self.loader = data_loader
         self.tracker = GreenMetricsTracker()
@@ -130,16 +130,18 @@ if __name__ == "__main__":
                         help="FL server address")
     parser.add_argument("--nodes", type=int, default=3,
                         help="Total number of FL nodes (for partitioning)")
+    parser.add_argument("--name", type=str, default=None,
+                        help="Custom display name for this client node")
     args = parser.parse_args()
 
-    node_name = NODE_NAMES[args.node_id] if args.node_id < len(NODE_NAMES) else f"node_{args.node_id}"
+    node_name = args.name if args.name else (NODE_NAMES[args.node_id] if args.node_id < len(NODE_NAMES) else f"node_{args.node_id}")
     print(f"Starting FL Edge Node [{node_name.upper()}]...")
 
     from dataset_manager import partition_for_fl
     partitions = partition_for_fl(num_nodes=args.nodes, batch_size=16)
     loader = partitions[args.node_id] if args.node_id < len(partitions) else None
 
-    client = WasteClient(node_id=args.node_id, data_loader=loader)
+    client = WasteClient(node_id=args.node_id, data_loader=loader, name=node_name)
     fl.client.start_client(
         server_address=args.server,
         client=client.to_client()

@@ -198,7 +198,7 @@ _fl_node_processes: list = []
 
 
 @app.post("/api/fl/start")
-async def start_fl(rounds: int = 3, num_nodes: int = 3):
+async def start_fl(rounds: int = 3, num_nodes: int = 3, local_clients: bool = True):
     global _fl_process, _fl_node_processes
 
     # Start server in background process
@@ -208,16 +208,17 @@ async def start_fl(rounds: int = 3, num_nodes: int = 3):
         cwd=str(Path.cwd())
     )
 
-    # Wait briefly then launch client nodes
-    await asyncio.sleep(3)
     _fl_node_processes = []
-    for i in range(num_nodes):
-        p = subprocess.Popen(
-            [sys.executable, "fl_client.py",
-             "--node-id", str(i), "--nodes", str(num_nodes)],
-            cwd=str(Path.cwd())
-        )
-        _fl_node_processes.append(p)
+    if local_clients:
+        # Wait briefly then launch client nodes
+        await asyncio.sleep(3)
+        for i in range(num_nodes):
+            p = subprocess.Popen(
+                [sys.executable, "fl_client.py",
+                 "--node-id", str(i), "--nodes", str(num_nodes)],
+                cwd=str(Path.cwd())
+            )
+            _fl_node_processes.append(p)
 
     return {
         "status": "fl_started",
@@ -225,6 +226,7 @@ async def start_fl(rounds: int = 3, num_nodes: int = 3):
         "node_pids": [p.pid for p in _fl_node_processes],
         "rounds": rounds,
         "num_nodes": num_nodes,
+        "local_clients": local_clients,
     }
 
 

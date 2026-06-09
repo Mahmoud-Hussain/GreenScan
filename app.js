@@ -252,9 +252,11 @@ async function runViewerPredict() {
 async function startFL() {
   const rounds = document.getElementById('fl-rounds').value;
   const nodes = document.getElementById('fl-nodes').value;
-  const r = await fetch(`${API}/api/fl/start?rounds=${rounds}&num_nodes=${nodes}`,{method:'POST'}).then(r=>r.json()).catch(e=>({error:e.message}));
+  const runLocal = document.getElementById('fl-local-clients').checked;
+  const r = await fetch(`${API}/api/fl/start?rounds=${rounds}&num_nodes=${nodes}&local_clients=${runLocal}`,{method:'POST'}).then(r=>r.json()).catch(e=>({error:e.message}));
   if (r.error) return alert('Error: '+r.error);
-  alert(`FL started! Server PID: ${r.server_pid}. Node PIDs: ${r.node_pids?.join(', ')}`);
+  const clientInfo = runLocal ? `Node PIDs: ${r.node_pids?.join(', ')}` : 'Waiting for external nodes to connect';
+  alert(`FL Server started! Server PID: ${r.server_pid}. ${clientInfo}`);
   for (let i=0;i<3;i++){const el=document.getElementById('fl-n'+i+'-status');if(el){el.textContent='Waiting';el.className='badge badge-yellow';}}
   setTimeout(loadFLStatus, 5000);
 }
@@ -450,10 +452,19 @@ async function captureAndPredict() {
   
   if (!cameraStream) return;
   
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
+  const cropSize = Math.min(video.videoWidth * 0.60, video.videoHeight);
+  canvas.width = cropSize;
+  canvas.height = cropSize;
+  
+  const startX = (video.videoWidth - cropSize) / 2;
+  const startY = (video.videoHeight - cropSize) / 2;
+  
   const ctx = canvas.getContext('2d');
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  ctx.drawImage(
+    video,
+    startX, startY, cropSize, cropSize,
+    0, 0, cropSize, cropSize
+  );
   
   container.style.display = 'none';
   spin.style.display = 'block';
