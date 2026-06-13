@@ -1,32 +1,36 @@
+```mermaid
 flowchart TD
 
-    A["AI Training Process"]
+    A[AI Training Process]
 
-    A --> B["Monitor CPU Usage"]
-    A --> C["Monitor RAM Usage"]
-    A --> D["Monitor Network Usage"]
-    A --> E["Monitor Runtime"]
+    A --> B[Monitor CPU Usage]
+    A --> C[Monitor RAM Usage]
+    A --> D[Monitor Network Bandwidth]
+    A --> E[Monitor Runtime]
 
-    B --> F["Estimate CPU Power"]
-    C --> G["Estimate RAM Power"]
-    D --> H["Estimate Network Power"]
+    B --> F[Estimate CPU Power]
+    C --> G[Estimate RAM Power]
+    D --> H[Estimate Network Power]
 
-    F --> I["Calculate Total Power"]
+    F --> I[Calculate Total Power]
     G --> I
     H --> I
 
-    I --> J["Calculate Energy Consumption"]
+    I --> J["Ptotal = Pcpu + Pram + Pnetwork"]
 
-    E --> J
+    J --> K["Energy = (Ptotal * Runtime) / 1000"]
 
-    J --> K["Apply Carbon Intensity Factor"]
+    E --> K
 
-    K --> L["Calculate Carbon Emission"]
+    K --> L[Apply Carbon Intensity Factor]
 
-    L --> M["Store Metrics in Database"]
+    L --> M["CO2 = Energy * CarbonIntensity"]
 
-    M --> N["Dashboard and Analytics"]
+    M --> N[Store Metrics in SQLite Database]
 
-    N --> O["Carbon Footprint Reports"]
-    N --> P["Federated Learning Comparison"]
-    N --> Q["Accuracy vs Energy Analysis"]
+    N --> O[Dashboard and Analytics]
+
+    O --> P[Carbon Footprint Reports]
+    O --> Q[Federated Learning Comparison]
+    O --> R[Accuracy vs Energy Analysis]
+```
